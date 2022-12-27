@@ -43,7 +43,7 @@ class ListenerAspect(val sshConfiguration: SshConfiguration) {
             val role = runBlocking { author.roles.toList()[0] }
             // 判断是否开机
             if (annotation.isBoot && !RobotCore.BOOT_MAP.getOrDefault(group.id.toString(), false)) {
-                if (signature.name == "down()") {
+                if (signature.name == "down") {
                     return null
                 }
                 return proceedFailed("当前群未开机", group.id.toString())
