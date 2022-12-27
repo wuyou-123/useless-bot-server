@@ -24,15 +24,15 @@ object MessageUtil {
 
     fun Path.getResMessage() = runBlocking { this@getResMessage.toResource().toImage() }
 
-    suspend fun ChatRoomMessageEvent.authorId() = author().id.toString()
+    fun ChatRoomMessageEvent.authorId() = runBlocking { author().id.toString() }
 
-    suspend fun FriendMessageEvent.authorId() = friend().id.toString()
+    fun FriendMessageEvent.authorId() = runBlocking { friend().id.toString() }
 
-    suspend fun GroupEvent.groupId() = group().id.toString()
+    fun GroupEvent.groupId() = runBlocking { group().id.toString() }
 
-    suspend fun FriendInfoContainer.authorId() = friend().id.toString()
+    fun FriendInfoContainer.authorId() = runBlocking { friend().id.toString() }
 
-    suspend fun GroupInfoContainer.groupId() = group().id.toString()
+    fun GroupInfoContainer.groupId() = runBlocking { group().id.toString() }
 
     fun Event.botId() = bot.id.toString()
 }
