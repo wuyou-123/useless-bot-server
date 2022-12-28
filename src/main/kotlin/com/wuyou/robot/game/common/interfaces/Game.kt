@@ -65,7 +65,7 @@ abstract class Game<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
     /**
      * 根据房间id获取房间列表
      */
-    fun roomListById(id: String): List<R> = roomList.filter { it.id == id }
+    fun roomListById(id: Int): List<R> = roomList.filter { it.id == id }
 
     /**
      * 载入游戏时执行的事件

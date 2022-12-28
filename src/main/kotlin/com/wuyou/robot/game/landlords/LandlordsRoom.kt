@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit
  * @author wuyou
  */
 class LandlordsRoom(
-    override var id: String,
-    override var name: String,
+    override val id: Int,
+    override val name: String,
     override val game: LandlordsGame,
-) : Room<LandlordsGame, LandlordsPlayer, LandlordsRoom>() {
-    private val waitTime = 10L
+) : Room<LandlordsGame, LandlordsPlayer, LandlordsRoom>(id, name) {
+    private val waitTime = 20L
     private var timer: Timer<*>? = null
     override fun onCreate(args: GameArg) {
-        send("创建房间{${id}}成功! 当前人数${playerList.size}/${game.maxPlayerCount}, ${waitTime}秒内如果没有玩家加入将解散房间")
+        send("创建房间[${id}]成功! 当前人数${playerList.size}/${game.maxPlayerCount}, ${waitTime}秒内如果没有玩家加入将解散房间")
         timer = Timer(waitTime, TimeUnit.SECONDS, args, true) {
             onFinish {
                 destroyRoom()
@@ -28,14 +28,14 @@ class LandlordsRoom(
     }
 
     override fun onTryJoin(player: LandlordsPlayer, args: GameArg): Boolean {
-        println("玩家 $player 尝试加入房间")
+//        println("玩家 $player 尝试加入房间")
         return true
     }
 
     override fun onJoin(player: LandlordsPlayer, args: GameArg) {
         if (playerList.size == 1) return
-        val p = "加入房间{${id}}成功, "
-        val p0 = "玩家${player}加入了房间, "
+        val p = "加入房间[${id}]成功, "
+        val p0 = "玩家 $player 加入了房间, "
         val msg = mutableListOf("当前人数${playerList.size}/${game.maxPlayerCount}")
         if (!isFull()) {
             msg += ", ${waitTime}秒内如果没有其他玩家加入将解散房间"

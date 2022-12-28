@@ -59,9 +59,10 @@ abstract class GameEvent<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, 
         eventMatcher: ContinuousSessionEventMatcher<MessageEvent> = ContinuousSessionEventMatcher,
     ): MessageContent? {
         player.room.game.waitPlayerList += player
-        return Sender.sendGroupAndWait(player.room.id, player.id, message, "", timeout, timeUnit, eventMatcher).also {
-            player.room.game.waitPlayerList.remove(player)
-        }
+        return Sender.sendPrivateAndWait(player.id, message, "", timeout, timeUnit, eventMatcher)
+            .also {
+                player.room.game.waitPlayerList.remove(player)
+            }
     }
 
 //    /**

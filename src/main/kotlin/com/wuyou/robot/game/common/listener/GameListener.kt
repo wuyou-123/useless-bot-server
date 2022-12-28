@@ -48,7 +48,7 @@ class GameListener {
     }
 
     @RobotListen(isBoot = true)
-    @Filter("创建{{game}}房间")
+    @Filter("创建{{game,[\\u4e00-\\u9fa5]{1,}}}房间")
     suspend fun FriendMessageEvent.createGame(@FilterValue("game") name: String) {
         gameManager().createRoomByGameName(this, name)
     }

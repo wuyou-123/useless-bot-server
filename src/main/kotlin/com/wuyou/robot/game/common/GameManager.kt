@@ -71,7 +71,7 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
                 getPlayerByEvent(event)?.let {
                     throw GameException("你已经在房间[${it.room.name}]中了", event)
                 }
-                val game = getGameByName(name) ?: throw GameException("没有找到游戏$name", event)
+                val game = getGameByName(name) ?: throw GameException("没有找到游戏\"$name\"", event)
                 return@runBlocking instanceRoom(game, event)?.also { room ->
                     val args = GameArg(event)
                     getInstance().roomList += room
@@ -100,26 +100,30 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
         event: FriendMessageEvent,
         num: Int
     ) {
-        getPlayerByEvent(event)?.let {
-            throw GameException("你已经在房间[${it.room.name}]中了", event)
-        }
-        val room = getRoomById(num) ?: throw GameException("没有找到编号为${num}的房间", event)
-        if (room.isFull()) {
-            throw GameException("房间已满", event)
-        }
-        val player = instancePlayer(room, event.friend()) ?: throw GameException("初始化玩家失败!", event)
-        getInstance().playerList += player
-        room.playerList += player
-        val args = GameArg(event)
-        if (room.onTryJoin(player, args)) {
-            room.onJoin(player, args)
-        } else {
-            getInstance().playerList -= player
-            room.playerList -= player
-        }
-        logger { "[${room.game.name}] 玩家${event.authorId()}加入了房间${room.id}" }
-        if (room.isFull()) {
-            room.onPlayerFull()
+        synchronized(playerList) {
+            runBlocking {
+                getPlayerByEvent(event)?.let {
+                    throw GameException("你已经在房间[${it.room.name}]中了", event)
+                }
+                val room = getRoomById(num) ?: throw GameException("没有找到编号为${num}的房间", event)
+                if (room.isFull()) {
+                    throw GameException("房间已满", event)
+                }
+                val player = instancePlayer(room, event.friend()) ?: throw GameException("初始化玩家失败!", event)
+                getInstance().playerList += player
+                room.playerList += player
+                val args = GameArg(event)
+                if (room.onTryJoin(player, args)) {
+                    room.onJoin(player, args)
+                } else {
+                    getInstance().playerList -= player
+                    room.playerList -= player
+                }
+                logger { "[${room.game.name}] 玩家${event.authorId()}加入了房间${room.id}" }
+                if (room.isFull()) {
+                    room.onPlayerFull()
+                }
+            }
         }
     }
 
@@ -127,20 +131,24 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
      * 离开房间
      */
     suspend fun leaveRoom(event: FriendMessageEvent) {
-        val player = getPlayerByEvent(event) ?: return
-        val room = player.room
-        if (room.onTryLeave(player)) {
-            room.onLeave(player)
-            if (room.playerList.size == 1) {
-                room.beforeDestroy()
-                room.playerList.remove(player)
-                room.onDestroy()
-                room.game.roomList.remove(room)
-                getInstance().roomList.remove(room)
-            } else {
-                room.playerList.remove(player)
+        synchronized(playerList) {
+            runBlocking {
+                val player = getPlayerByEvent(event) ?: return@runBlocking
+                val room = player.room
+                if (room.onTryLeave(player)) {
+                    room.onLeave(player)
+                    if (room.playerList.size == 1) {
+                        room.beforeDestroy()
+                        room.playerList.remove(player)
+                        room.onDestroy()
+                        room.game.roomList.remove(room)
+                        getInstance().roomList.remove(room)
+                    } else {
+                        room.playerList.remove(player)
+                    }
+                    getInstance().playerList.remove(player)
+                }
             }
-            getInstance().playerList.remove(player)
         }
     }
 
@@ -162,17 +170,14 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
      * 根据房间id获取房间
      */
     fun getRoomById(num: Int): R? {
-        getInstance().roomList.find { it.id == num.toString() }?.let {
-            return it
-        }
-        return null
+        return getInstance().roomList.find { it.id == num }
     }
 
-    suspend fun getPlayerByEvent(event: FriendMessageEvent): P? {
-        getInstance().playerList.find { it.id == event.authorId() }?.let {
-            return it
-        }
-        return null
+    /**
+     * 根据事件获取玩家对象
+     */
+    fun getPlayerByEvent(event: FriendMessageEvent): P? {
+        return getInstance().playerList.find { it.id == event.authorId() }
     }
 
     /**
@@ -189,7 +194,7 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
                 } as Class<R>
             room.kotlin.constructors.find { it.parameters.size == 3 }?.let {
                 return it.call(
-                    "" + Random.nextInt(100000..999999),
+                    Random.nextInt(100000..999999),
                     "${event.friend().username}的房间(${game.name})",
                     game
                 )
