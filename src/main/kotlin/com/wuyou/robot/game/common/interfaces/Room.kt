@@ -90,6 +90,11 @@ abstract class Room<G : Game<G, R, P>, P : Player<G, R, P>, R : Room<G, P, R>> {
     open fun onDestroy() {}
 
     /**
+     * 尝试加入房间时执行的方法,用于实现类重写
+     */
+    open fun onTryJoin(player: P, args: GameArg) = true
+
+    /**
      * 加入房间时执行的方法,用于实现类重写,不需要手动添加玩家!
      */
     open fun onJoin(player: P, args: GameArg) {}
