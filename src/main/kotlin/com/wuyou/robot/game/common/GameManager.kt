@@ -104,10 +104,19 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
             throw GameException("你已经在房间[${it.room.name}]中了", event)
         }
         val room = getRoomById(num) ?: throw GameException("没有找到编号为${num}的房间", event)
+        if (room.isFull()) {
+            throw GameException("房间已满", event)
+        }
         val player = instancePlayer(room, event.friend()) ?: throw GameException("初始化玩家失败!", event)
         getInstance().playerList += player
         room.playerList += player
-        room.onJoin(player, GameArg(event))
+        val args = GameArg(event)
+        if (room.onTryJoin(player, args)) {
+            room.onJoin(player, args)
+        } else {
+            getInstance().playerList -= player
+            room.playerList -= player
+        }
         logger { "[${room.game.name}] 玩家${event.authorId()}加入了房间${room.id}" }
         if (room.isFull()) {
             room.onPlayerFull()
