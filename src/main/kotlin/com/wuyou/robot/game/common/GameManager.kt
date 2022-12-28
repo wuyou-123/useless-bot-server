@@ -194,7 +194,7 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
                 } as Class<R>
             room.kotlin.constructors.find { it.parameters.size == 3 }?.let {
                 return it.call(
-                    Random.nextInt(100000..999999),
+                    generateRoomId(),
                     "${event.friend().username}的房间(${game.name})",
                     game
                 )
@@ -203,6 +203,20 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
             Sender.sendPrivateMsg(RobotCore.ADMINISTRATOR[0], e.message ?: e.stackTraceToString())
         }
         return null
+    }
+
+    private fun generateRoomId(): Int {
+        fun getNum() = Random.nextInt(100000..999999)
+        synchronized(roomList) {
+            val idList = roomList.map { it.id }
+            var num = getNum()
+            val set = mutableSetOf(num).apply { addAll(idList) }
+            while (set.size == idList.size) {
+                num = getNum()
+                set += num
+            }
+            return num
+        }
     }
 
 
