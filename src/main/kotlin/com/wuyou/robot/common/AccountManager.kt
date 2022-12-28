@@ -46,8 +46,7 @@ class AccountManager : CommandLineRunner {
         mCache[bot.id.tryToLongID()] = bot.groups.toList().map { it.member(bot.id)!! }.toMutableList()
         bot.groups.toList().forEach { group ->
             gCache[group.id.tryToLongID()] = group.members.toList().onEach { member ->
-                mCache.putIfAbsent(member.id.tryToLongID(), mutableListOf(member))
-                    ?.also { mCache[member.id]!!.add(member) }
+                mCache.putIfAbsent(member.id.tryToLongID(), mutableListOf(member))?.also { it += member }
             }
         }
         bot.contacts.toList().forEach {

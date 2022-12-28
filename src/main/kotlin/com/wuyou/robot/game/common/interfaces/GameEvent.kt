@@ -38,7 +38,7 @@ abstract class GameEvent<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, 
             } as Class<G>)
         when (val gameEvents = game.eventMap[getStatus()]) {
             null -> game.eventMap[getStatus()] = mutableListOf(this)
-            else -> gameEvents.add(this)
+            else -> gameEvents += this
         }
         logger(LogLevel.DEBUG) { "init game event [${game.name}] ${this@GameEvent::class.simpleName}" }
     }
@@ -58,7 +58,7 @@ abstract class GameEvent<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, 
         timeUnit: TimeUnit = TimeUnit.MINUTES,
         eventMatcher: ContinuousSessionEventMatcher<MessageEvent> = ContinuousSessionEventMatcher,
     ): MessageContent? {
-        player.room.game.waitPlayerList.add(player)
+        player.room.game.waitPlayerList += player
         return Sender.sendGroupAndWait(player.room.id, player.id, message, "", timeout, timeUnit, eventMatcher).also {
             player.room.game.waitPlayerList.remove(player)
         }

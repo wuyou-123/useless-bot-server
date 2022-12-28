@@ -24,13 +24,13 @@ class GameListener {
         }
         val msg = mutableListOf<Any>()
         gameManager().getRoomListByGame(name)?.also {
-            msg.add("房间列表:")
+            msg += "房间列表:"
             it.forEachIndexed { _, room ->
-                msg.add(room.getDesc(authorId()))
+                msg += room.getDesc(authorId())
             }
             msg += "发送\"加入[房间编号]\"来加入房间"
         }.isNull {
-            msg.add("当前暂无房间")
+            msg += "当前暂无房间"
         }
         send(msg, "\n")
     }

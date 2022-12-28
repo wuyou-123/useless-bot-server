@@ -33,8 +33,8 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
             val nameList = mutableListOf<String>()
             map.forEach {
                 logger { "registering game ${it.value.name}(${it.value.id})..." }
-                it.value.let { game ->
-                    gameSet.add(game as G)
+                (it.value as G).let { game ->
+                    gameSet += game
                     gameNameMap[game.name]?.let {
                         throw GameException("已存在游戏名为${game.name}的游戏!")
                     }
@@ -78,9 +78,9 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
                     game.roomList += room
                     instancePlayer(room, event.friend())?.also { player ->
                         if (!getInstance().playerList.contains(player)) {
-                            getInstance().playerList.add(player)
+                            getInstance().playerList += player
                         }
-                        room.playerList.add(player)
+                        room.playerList += player
                         room.onCreate(args)
                         logger { "[${game.name}] 玩家${event.authorId()}创建了房间${room.id}" }
                         room.onJoin(player, args)
@@ -105,8 +105,8 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
         }
         val room = getRoomById(num) ?: throw GameException("没有找到编号为${num}的房间", event)
         val player = instancePlayer(room, event.friend()) ?: throw GameException("初始化玩家失败!", event)
-        getInstance().playerList.add(player)
-        room.playerList.add(player)
+        getInstance().playerList += player
+        room.playerList += player
         room.onJoin(player, GameArg(event))
         logger { "[${room.game.name}] 玩家${event.authorId()}加入了房间${room.id}" }
         if (room.isFull()) {
