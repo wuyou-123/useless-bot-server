@@ -47,13 +47,14 @@ abstract class Room<G : Game<G, R, P>, P : Player<G, R, P>, R : Room<G, P, R>>(
      * 执行游戏事件
      */
     @Suppress("UNCHECKED_CAST")
-    protected fun go(
+    fun go(
         event: KClass<out GameEvent<G, R, P>>,
+        gameArg: GameArg = GameArg()
     ) {
-        game.go(event, this as R)
+        game.go(event, this as R, gameArg)
     }
 
-    protected fun destroyRoom() {
+    fun destroyRoom() {
         beforeDestroy()
         this.playerList.forEach {
             gameManager().playerList.remove(it)

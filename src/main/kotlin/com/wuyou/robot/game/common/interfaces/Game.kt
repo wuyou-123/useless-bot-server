@@ -31,7 +31,7 @@ abstract class Game<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
 
     /**
      * 等待玩家列表
-     * 当调用[GameEvent.sendRoomAndWaitPlayerNext]时,会等待该玩家的下一条消息,此时不执行事件监听器
+     * 当调用[GameEvent.sendPlayerAndWaitPlayerNext]时,会等待该玩家的下一条消息,此时不执行事件监听器
      */
     val waitPlayerList: MutableList<P> = mutableListOf()
 
@@ -63,43 +63,9 @@ abstract class Game<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
     }
 
     /**
-     * 根据房间id获取房间列表
-     */
-    fun roomListById(id: Int): List<R> = roomList.filter { it.id == id }
-
-    /**
      * 载入游戏时执行的事件
      */
     open fun load() {}
-
-    /**
-     * 检查消息是否符合创建游戏的条件
-     *
-     * @param gameArg 消息内容以及解析后的参数map
-     * @return 返回传递给事件的参数, 返回null则不创建游戏
-     */
-    open fun checkMessage(gameArg: GameArg): GameArg? = if (gameArg.map.size == gameArgs.size) gameArg else null
-
-    /**
-     * 已经在房间里的提示
-     */
-    open fun alreadyInRoomTip(room: Room<*, *, *>): String = "你已经在房间里了"
-
-    /**
-     * 检查消息,如果通过则创建游戏或将玩家加入到游戏中
-     */
-    fun checkMessage(event: FriendMessageEvent): GameArg? {
-        val gameArg = GameArg(event)
-        val split = event.messageContent.plainText.split(" ")
-        if (split[0] == name) {
-            split.forEachIndexed { index, it ->
-                if (index != 0 && gameArgs.size >= index) {
-                    gameArg[gameArgs[index - 1]] = it
-                }
-            }
-        }
-        return checkMessage(gameArg)
-    }
 
     /**
      * 复制当前游戏资源文件夹到缓存目录
@@ -122,7 +88,7 @@ abstract class Game<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
     /**
      * 获取当前游戏的临时路径
      */
-    private fun getTempPath(): String {
+    fun getTempPath(): String {
         return RobotCore.TEMP_PATH + id + File.separator
     }
 }

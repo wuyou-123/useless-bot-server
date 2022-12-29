@@ -10,9 +10,6 @@ abstract class Player<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>>
     open var name: String,
     open var room: R,
 ) {
-    var isPlaying = false
-    var pre: P? = null
-    var next: P? = null
 
     fun getRoomId() = room.id
 
