@@ -2,13 +2,16 @@ package com.wuyou.robot.game.landlords
 
 import com.wuyou.robot.common.Timer
 import com.wuyou.robot.common.logger
+import com.wuyou.robot.game.common.exception.GameException
 import com.wuyou.robot.game.common.interfaces.GameArg
 import com.wuyou.robot.game.common.interfaces.Room
+import com.wuyou.robot.game.landlords.common.Poker
 import com.wuyou.robot.game.landlords.event.StartGameEvent
 import love.forte.simbot.event.FriendMessageEvent
 import java.util.concurrent.TimeUnit
 
 /**
+ * 斗地主房间
  * @author wuyou
  */
 class LandlordsRoom(
@@ -18,6 +21,33 @@ class LandlordsRoom(
 ) : Room<LandlordsGame, LandlordsPlayer, LandlordsRoom>(id, name) {
     private val waitTime = 20L
     private var timer: Timer<*>? = null
+
+    /**
+     * 地主牌
+     */
+    var landlordsPoker: List<Poker>? = null
+
+    /**
+     * 地主玩家
+     */
+    var landlordsPlayer: LandlordsPlayer? = null
+
+    var currentPlayerIndex = -1
+    var currentPlayer: LandlordsPlayer
+        get() = playerList[currentPlayerIndex]
+        set(value) {
+            if (!playerList.contains(value)) throw GameException("$value 不在房间 $id 中")
+            currentPlayerIndex = playerList.indexOf(value)
+        }
+    val otherPlayer: List<LandlordsPlayer>
+        get() = playerList.filterIndexed { index, _ -> index != currentPlayerIndex }
+    val nextPlayer: LandlordsPlayer
+        get() = if (currentPlayerIndex + 1 == playerList.size) playerList[0]
+        else playerList[currentPlayerIndex + 1]
+    val prePlayer: LandlordsPlayer
+        get() = if (currentPlayerIndex == 0) playerList[playerList.size - 1]
+        else playerList[currentPlayerIndex - 1]
+
     override fun onCreate(args: GameArg) {
         send("创建房间[${id}]成功! 当前人数${playerList.size}/${game.maxPlayerCount}, ${waitTime}秒内如果没有玩家加入将解散房间")
         timer = Timer(waitTime, TimeUnit.SECONDS, args, true) {
@@ -46,10 +76,10 @@ class LandlordsRoom(
                 }
             }
         }
-        player.send(mutableListOf(p).apply { addAll(msg) })
+        player.send(mutableListOf(p, *msg.toTypedArray()))
         playerList.forEach {
             if (it != player) {
-                it.send(mutableListOf(p0).apply { addAll(msg) })
+                it.send(mutableListOf(p0, *msg.toTypedArray()))
             }
         }
     }
@@ -74,7 +104,6 @@ class LandlordsRoom(
 
     override fun onPlayerFull() {
         logger { "[${game.name}] 房间${id}玩家已满" }
-        send("房间已满,开始游戏!")
         timer?.cancel()
         go(StartGameEvent::class)
     }

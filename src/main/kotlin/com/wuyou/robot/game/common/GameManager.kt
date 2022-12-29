@@ -250,6 +250,11 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
         }
 
         fun getInstance() = instance.getInstance()
+
+        /**
+         * 获取[Game]的实例对象
+         */
+        inline fun <reified T : Game<T, R, P>, R, P> getGame(): T = getInstance().gameSet.find { it is T } as T
     }
 }
 
