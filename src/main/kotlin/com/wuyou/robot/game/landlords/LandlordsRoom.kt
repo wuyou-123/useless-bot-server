@@ -19,7 +19,7 @@ class LandlordsRoom(
     override val name: String,
     override val game: LandlordsGame,
 ) : Room<LandlordsGame, LandlordsPlayer, LandlordsRoom>(id, name) {
-    private val waitTime = 20L
+    private val waitTime = 30L
     private var timer: Timer<*>? = null
 
     /**
@@ -47,6 +47,37 @@ class LandlordsRoom(
     val prePlayer: LandlordsPlayer
         get() = if (currentPlayerIndex == 0) playerList[playerList.size - 1]
         else playerList[currentPlayerIndex - 1]
+
+    /**
+     * 发送消息
+     */
+    override fun send(messages: Any, separator: String) {
+        if (currentPlayerIndex == -1) {
+            return super.send(messages, separator)
+        }
+        if (messages is String) {
+            playerList.forEach {
+                if (it == currentPlayer) it.send(messages.replace("#player", "您"))
+                else it.send(messages.replace("#player", currentPlayer.toString()))
+            }
+        } else if (messages is Collection<*>) {
+            val list = mutableListOf<Any>()
+            val cList = mutableListOf<Any>()
+            messages.forEach {
+                if (it is String) {
+                    list += it.replace("#player", currentPlayer.toString())
+                    cList += it.replace("#player", "您")
+                } else if (it != null) {
+                    list += it
+                    cList += it
+                }
+            }
+            playerList.forEach {
+                if (it == currentPlayer) it.send(cList, separator)
+                else it.send(list, separator)
+            }
+        }
+    }
 
     override fun onCreate(args: GameArg) {
         send("创建房间[${id}]成功! 当前人数${playerList.size}/${game.maxPlayerCount}, ${waitTime}秒内如果没有玩家加入将解散房间")

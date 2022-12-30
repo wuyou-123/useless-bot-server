@@ -4,7 +4,7 @@ package com.wuyou.robot.game.landlords.enums
  * 扑克牌
  * @author wuyou
  */
-enum class PokerLevel(val level: Int, val pokerName: String, private val alias: Array<Char>) {
+enum class PokerLevel(val level: Int, val pokerName: String, val alias: Array<Char>) {
     /**
      * 所有的牌
      */
@@ -40,5 +40,7 @@ enum class PokerLevel(val level: Int, val pokerName: String, private val alias: 
                 ALIAS_SET.addAll(it.alias)
             }
         }
+
+        fun aliasContains(key: Char) = ALIAS_SET.contains(key)
     }
 }
