@@ -32,6 +32,11 @@ class LandlordsRoom(
      */
     var landlordsPlayer: LandlordsPlayer? = null
 
+    /**
+     * 最后一次出了牌的玩家
+     */
+    var lastPlayPlayer: LandlordsPlayer? = null
+
     var currentPlayerIndex = -1
     var currentPlayer: LandlordsPlayer
         get() = playerList[currentPlayerIndex]

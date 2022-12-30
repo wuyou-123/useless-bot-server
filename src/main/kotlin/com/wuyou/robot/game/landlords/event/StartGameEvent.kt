@@ -1,6 +1,5 @@
 package com.wuyou.robot.game.landlords.event
 
-import com.wuyou.robot.game.common.exception.GameException
 import com.wuyou.robot.game.common.interfaces.GameArg
 import com.wuyou.robot.game.common.interfaces.GameEvent
 import com.wuyou.robot.game.landlords.LandlordsGame
@@ -36,7 +35,7 @@ class StartGameEvent : GameEvent<LandlordsGame, LandlordsRoom, LandlordsPlayer>(
         room.landlordsPlayer = null
         room.playerList.forEach {
             it.send("游戏开始! 您的牌如下: ")
-            it.send(PokerUtil.getPoker(it.pokerList) ?: throw GameException("生成扑克牌失败"))
+            it.send(PokerUtil.getPoker(it.pokerList))
         }
         room.go(CallLandlordsEvent::class, gameArg)
     }

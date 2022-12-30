@@ -15,7 +15,7 @@ object PokerUtil {
      * 所有扑克牌类型
      */
     private val BASE_POKERS: List<Poker>
-    private val POKER_COMPARATOR = Comparator.comparingInt { poker: Poker -> poker.level.level }
+    val POKER_COMPARATOR: Comparator<Poker> = Comparator.comparingInt { poker: Poker -> poker.level.level }
 
     init {
         val pokerList = mutableListOf<Poker>()
@@ -56,9 +56,31 @@ object PokerUtil {
         return pokersList.toList()
     }
 
-    fun getPoker(pokers: List<Poker>): ResourceImage? {
+    fun parsePoker(message: String): Array<Char>? {
+        var message0 = replaceDoubleMessage(message)
+        message0 = replaceKingMessage(message0)
+        message0 = message0.replace("10", "0").replace("\\s".toRegex(), "")
+        val list = mutableListOf<Char>()
+        message0.toCharArray().forEach { c ->
+            if (!PokerLevel.aliasContains(c)) return null
+            list += c
+        }
+        return list.toTypedArray()
+    }
+
+    private fun replaceDoubleMessage(message: String): String {
+        val isMatch = "^对.$".toRegex().matches(message)
+        return if (!isMatch) message
+        else "" + message[1] + message[1]
+    }
+
+    private fun replaceKingMessage(message: String): String {
+        return message.replace("大王", "x").replace("小王", "s").replace("王炸", "sx").replace("双王", "sx")
+    }
+
+    fun getPoker(pokers: List<Poker>): ResourceImage {
         if (pokers.isEmpty()) {
-            return null
+            throw GameException("扑克牌为空!")
         }
         val pokerList: MutableList<String> = java.util.ArrayList()
         for (poker in pokers) {
@@ -109,5 +131,20 @@ object PokerUtil {
             pokerFile.toString()
         )
         return pokerFile.toString().getResMessage()
+    }
+
+    fun filterPokerByMessage(message: String, pokerList: List<Poker>): List<Poker>? {
+        val list = parsePoker(message) ?: return null
+        val pokers0 = mutableListOf<Poker>()
+        val pokers1 = ArrayList(pokerList)
+        for (c in list) {
+            pokers1.filter { it.level.alias.contains(c) }[0].also {
+                pokers0 += it
+                pokers1.remove(it)
+            }
+        }
+        return pokers0.let {
+            if (it.size != list.size) null else it
+        }
     }
 }
