@@ -45,19 +45,21 @@ abstract class GameEvent<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, 
 
     /**
      * 向玩家发送消息并等待玩家的下一条消息
-     * @param message 消息内容
+     * @param messages 消息内容
+     * @param separator [messages]是数组或列表时的消息分隔符
      * @param timeout 超时时间,单位[timeUnit]
      * @param timeUnit 超时时间单位
      * @param eventMatcher 收到消息时的匹配方法,只返回匹配通过时的消息
      */
-    open suspend fun P.sendPlayerAndWaitPlayerNext(
-        message: String,
-        timeout: Long = 1,
-        timeUnit: TimeUnit = TimeUnit.MINUTES,
+    open suspend fun P.sendAndWaitNext(
+        messages: Any,
+        separator: String = "",
+        timeout: Long = 30,
+        timeUnit: TimeUnit = TimeUnit.SECONDS,
         eventMatcher: ContinuousSessionEventMatcher<MessageEvent> = ContinuousSessionEventMatcher,
     ): MessageContent? {
         room.game.waitPlayerList += this
-        return Sender.sendPrivateAndWait(id, message, "", timeout, timeUnit, eventMatcher)
+        return Sender.sendPrivateAndWait(id, messages, separator, timeout, timeUnit, eventMatcher)
             .also { room.game.waitPlayerList.remove(this) }
     }
 

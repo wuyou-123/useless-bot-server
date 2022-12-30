@@ -4,6 +4,8 @@ import com.wuyou.robot.common.RobotCore
 import com.wuyou.robot.common.isNull
 import com.wuyou.robot.common.send
 import com.wuyou.robot.exception.RobotException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import love.forte.simbot.event.FriendMessageEvent
 import org.springframework.core.io.ClassPathResource
 import java.io.File
@@ -31,7 +33,7 @@ abstract class Game<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
 
     /**
      * 等待玩家列表
-     * 当调用[GameEvent.sendPlayerAndWaitPlayerNext]时,会等待该玩家的下一条消息,此时不执行事件监听器
+     * 当调用[GameEvent.sendAndWaitNext]时,会等待该玩家的下一条消息,此时不执行事件监听器
      */
     val waitPlayerList: MutableList<P> = mutableListOf()
 
@@ -57,7 +59,13 @@ abstract class Game<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
      */
     fun go(event: KClass<out GameEvent<G, R, P>>, room: R, gameArg: GameArg = GameArg()) {
         val list = eventMap.values.reduce { acc, gameEvents -> gameEvents.also { it.addAll(acc) } }
-        list.find { it::class == event }?.also { it.invoke(room, gameArg) }.isNull {
+        list.find { it::class == event }?.also {
+            runBlocking {
+                coroutineScope {
+                    it.invoke(room, gameArg)
+                }
+            }
+        }.isNull {
             throw RobotException("game event is not found!")
         }
     }

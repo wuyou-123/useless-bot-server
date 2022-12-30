@@ -37,7 +37,7 @@ abstract class Room<G : Game<G, R, P>, P : Player<G, R, P>, R : Room<G, P, R>>(
     /**
      * 发送消息
      */
-    fun send(messages: Any, separator: String = "") {
+    open fun send(messages: Any, separator: String = "") {
         playerList.forEach {
             it.send(messages, separator)
         }

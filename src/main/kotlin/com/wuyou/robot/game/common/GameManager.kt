@@ -193,9 +193,10 @@ class GameManager<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, P>> {
                     (it as Class<*>).superclass == Room::class.java
                 } as Class<R>
             room.kotlin.constructors.find { it.parameters.size == 3 }?.let {
+                val roomId = generateRoomId()
                 return it.call(
-                    generateRoomId(),
-                    "${event.friend().username}的房间(${game.name})",
+                    roomId,
+                    "${event.friend().username}的${game.name}房间($roomId)",
                     game
                 )
             }
