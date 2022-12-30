@@ -8,7 +8,6 @@ import com.wuyou.robot.game.landlords.LandlordsRoom
 import com.wuyou.robot.game.landlords.common.MessageCmd
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
-import java.util.concurrent.TimeUnit
 
 /**
  * 抢地主事件
@@ -21,10 +20,8 @@ class CallLandlordsEvent : GameEvent<LandlordsGame, LandlordsRoom, LandlordsPlay
             it.send("现在轮到 $currentPlayer 抢地主了, 请耐心等待对方选择")
         }
         val message = runBlocking {
-            currentPlayer.sendPlayerAndWaitPlayerNext(
+            currentPlayer.sendAndWaitNext(
                 "现在轮到你了, 请在30秒内确认你是否抢地主?",
-                30,
-                TimeUnit.SECONDS
             ) {
                 mutableListOf<String>().apply {
                     addAll(MessageCmd.CALL_LANDLORDS_CMD_LIST)
@@ -35,12 +32,10 @@ class CallLandlordsEvent : GameEvent<LandlordsGame, LandlordsRoom, LandlordsPlay
         val isFinal = room.playerList.filter { it.calledLandlords != null }.size == 3
         if (message == null || MessageCmd.NOT_CALL_LANDLORDS_CMD_LIST.contains(message.plainText)) {
             // 超时或者不抢
-            currentPlayer.send((if (message == null) "等待超时! " else "") + "您没有抢地主")
-            room.otherPlayer.forEach { player -> player.send("$currentPlayer 没有抢地主") }
+            room.send((if (message == null) "等待超时! " else "") + "#player 没有抢地主")
             currentPlayer.calledLandlords = false
         } else {
-            currentPlayer.send("您选择抢地主")
-            room.otherPlayer.forEach { player -> player.send("$currentPlayer 选择了抢地主") }
+            room.send("#player 选择了抢地主")
             currentPlayer.calledLandlords = true
             room.landlordsPlayer = currentPlayer
         }
