@@ -14,8 +14,18 @@ object RuntimeUtil {
         val list = mutableListOf<String>()
         val proc = Runtime.getRuntime().exec(args.toTypedArray())
         proc.waitFor()
-        logger { proc.inputStream.reader().readLines().apply { list.addAll(this) } }
-        logger(LogLevel.ERROR) { proc.errorStream.reader().readText() }
+        proc.inputStream.reader().readLines().apply { list.addAll(this) }.apply {
+            if (isNotEmpty()) {
+                forEach { line ->
+                    logger { line }
+                }
+            }
+        }
+        proc.errorStream.reader().readText().apply {
+            if (isNotEmpty()) {
+                logger(LogLevel.ERROR) { this }
+            }
+        }
         return list
     }
 
