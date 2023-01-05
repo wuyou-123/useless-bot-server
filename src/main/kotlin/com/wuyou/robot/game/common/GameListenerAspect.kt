@@ -1,8 +1,8 @@
 package com.wuyou.robot.game.common
 
-import com.wuyou.robot.annotation.RobotListen
 import com.wuyou.robot.common.logger
 import com.wuyou.robot.common.send
+import com.wuyou.robot.game.common.annotation.GameListen
 import com.wuyou.robot.game.common.exception.GameException
 import love.forte.simbot.event.MessageEvent
 import org.aspectj.lang.ProceedingJoinPoint
@@ -23,8 +23,8 @@ class GameListenerAspect {
     /**
      * 拦截监听器方法
      */
-    @Around("execution(* com.wuyou.robot.game..*(..)) && @annotation(com.wuyou.robot.annotation.RobotListen) && @annotation(annotation))")
-    fun ProceedingJoinPoint.doAroundAdvice(annotation: RobotListen): Any? {
+    @Around("@annotation(com.wuyou.robot.game.common.annotation.GameListen) && @annotation(annotation))")
+    fun ProceedingJoinPoint.doAroundAdvice(annotation: GameListen): Any? {
         return try {
             proceed()
         } catch (e: GameException) {

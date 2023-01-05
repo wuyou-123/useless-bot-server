@@ -9,10 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * @author wuyou
  */
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 class Timer<T>(
     private val time: Long,
     private val timeUnit: TimeUnit,
-    private val arg: T,
+    val arg: T,
     autoStart: Boolean = false,
     timer: Timer<T>.() -> Unit,
 ) {
