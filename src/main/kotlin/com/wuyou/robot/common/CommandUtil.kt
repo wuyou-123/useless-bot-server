@@ -3,10 +3,12 @@ package com.wuyou.robot.common
 import com.wuyou.robot.common.CommandUtil.Companion.COMMAND_MAP
 import com.wuyou.robot.entity.Command
 import com.wuyou.robot.entity.CommandService
+import org.springframework.context.annotation.DependsOn
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
 @Component
+@DependsOn("startUpHandlerImpl")
 class CommandUtil(private val commandService: CommandService) {
     @PostConstruct
     fun init() {
@@ -26,9 +28,6 @@ private fun getMapKey(groupCode: String, key: String) = "${groupCode}---${key}"
 
 fun getCommand(groupCode: String, key: String, default: String): String =
     COMMAND_MAP[getMapKey(groupCode, key)]?.command ?: default
-
-fun getCommandOrNull(groupCode: String, key: String): String? =
-    COMMAND_MAP[getMapKey(groupCode, key)]?.command
 
 fun setCommand(groupCode: String, key: String, value: String) {
     (COMMAND_MAP[getMapKey(groupCode, key)] ?: Command(null, groupCode, key, value)).apply {
