@@ -1,8 +1,12 @@
 package com.wuyou.robot.game.landlords
 
+import com.wuyou.robot.common.Timer
+import com.wuyou.robot.game.common.interfaces.GameArg
+import com.wuyou.robot.game.common.interfaces.GameStatus
 import com.wuyou.robot.game.common.interfaces.Player
 import com.wuyou.robot.game.landlords.common.Poker
 import com.wuyou.robot.game.landlords.enums.PlayerType
+import java.util.concurrent.TimeUnit
 
 /**
  * @author wuyou
@@ -14,6 +18,8 @@ class LandlordsPlayer(
 ) : Player<LandlordsGame, LandlordsRoom, LandlordsPlayer>(id, name, room) {
     lateinit var pokerList: MutableList<Poker>
     var type: PlayerType? = null
+    var status: String = ""
+    var timer: Timer<GameArg>? = null
 
     /**
      * 是否叫地主,没叫过为null
@@ -31,4 +37,12 @@ class LandlordsPlayer(
     override fun toString(): String {
         return super.toString() + if (type != null) "[${type!!.type}]" else ""
     }
+
+    fun pokerTimer(gameArg: GameArg, block: (Timer<GameArg>) -> Unit) {
+        timer = Timer(30, TimeUnit.SECONDS, gameArg, true) {
+            block(this)
+        }
+    }
+
+    override fun getStatus() = GameStatus(status.ifEmpty { "null" })
 }

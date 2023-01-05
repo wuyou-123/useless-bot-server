@@ -72,9 +72,16 @@ abstract class GameEvent<G : Game<G, R, P>, R : Room<G, P, R>, P : Player<G, R, 
 /**
  * 游戏状态
  */
-class GameStatus(val status: String) {
-    override fun toString(): String {
-        return status
+data class GameStatus(val status: String) {
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (other is GameStatus) return status == other.status
+        if (other is String) return status == other
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return status.hashCode()
     }
 }
 
