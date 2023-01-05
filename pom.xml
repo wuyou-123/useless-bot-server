@@ -19,6 +19,7 @@
         <kotlin.version>1.6.21</kotlin.version>
         <simbot.version>3.0.0-M6</simbot.version>
         <simbot-component-mirai.version>3.0.0.0-beta.6</simbot-component-mirai.version>
+        <snakeyaml.version>1.33</snakeyaml.version>
     </properties>
     <dependencies>
         <!-- simbot-spring-boot-starter 库 -->
