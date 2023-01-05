@@ -60,26 +60,34 @@ class LandlordsRoom(
         if (currentPlayerIndex == -1) {
             return super.send(messages, separator)
         }
-        if (messages is String) {
-            playerList.forEach {
-                if (it == currentPlayer) it.send(messages.replace("#player", "您"))
-                else it.send(messages.replace("#player", currentPlayer.toString()))
-            }
-        } else if (messages is Collection<*>) {
-            val list = mutableListOf<Any>()
-            val cList = mutableListOf<Any>()
-            messages.forEach {
-                if (it is String) {
-                    list += it.replace("#player", currentPlayer.toString())
-                    cList += it.replace("#player", "您")
-                } else if (it != null) {
-                    list += it
-                    cList += it
+        when (messages) {
+            is String -> {
+                playerList.forEach {
+                    if (it == currentPlayer) it.send(messages.replace("#player", "您"))
+                    else it.send(messages.replace("#player", currentPlayer.toString()))
                 }
             }
-            playerList.forEach {
-                if (it == currentPlayer) it.send(cList, separator)
-                else it.send(list, separator)
+
+            is Collection<*> -> {
+                val list = mutableListOf<Any>()
+                val cList = mutableListOf<Any>()
+                messages.forEach {
+                    if (it is String) {
+                        list += it.replace("#player", currentPlayer.toString())
+                        cList += it.replace("#player", "您")
+                    } else if (it != null) {
+                        list += it
+                        cList += it
+                    }
+                }
+                playerList.forEach {
+                    if (it == currentPlayer) it.send(cList, separator)
+                    else it.send(list, separator)
+                }
+            }
+
+            else -> {
+                return super.send(messages, separator)
             }
         }
     }

@@ -138,9 +138,10 @@ object PokerUtil {
         val pokers0 = mutableListOf<Poker>()
         val pokers1 = ArrayList(pokerList)
         for (c in list) {
-            pokers1.filter { it.level.alias.contains(c) }[0].also {
-                pokers0 += it
-                pokers1.remove(it)
+            pokers1.filter { it.level.alias.contains(c) }.also {
+                if (it.isEmpty()) return null
+                pokers0 += it[0]
+                pokers1.remove(it[0])
             }
         }
         return pokers0.let {
